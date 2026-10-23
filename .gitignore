@@ -1,0 +1,17 @@
+# Build outputs
+*.o
+*.obj
+*.exe
+/loongarch_emu
+/qimo
+
+# Editor and OS files
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Local credentials and machine-specific configuration
+.env
+.env.*
