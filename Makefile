@@ -4,9 +4,11 @@
 
 CC      = gcc
 CFLAGS  = -Wall -Wextra -std=c99 -g -O2
-TARGET  = loongarch_emu
-OBJS    = main.o decoder.o cpu_core.o compiler_core.o storage.o ui.o
-HEADERS = global.h decoder.h cpu_core.h compiler_core.h storage.h ui.h
+CPPFLAGS += -Iinclude
+BUILD_DIR = build
+TARGET  = $(BUILD_DIR)/loongarch_emu
+OBJS    = $(addprefix $(BUILD_DIR)/,main.o decoder.o cpu_core.o compiler_core.o storage.o ui.o)
+HEADERS = $(wildcard include/*.h)
 ASM     ?= examples/demo.asm
 
 ifeq ($(OS),Windows_NT)
@@ -21,8 +23,15 @@ $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 	@echo "✅ 编译完成: ./$(TARGET)"
 
-%.o: %.c $(HEADERS)
-	$(CC) $(CFLAGS) -c -o $@ $<
+$(BUILD_DIR)/%.o: src/%.c $(HEADERS) | $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+
+$(BUILD_DIR):
+ifeq ($(OS),Windows_NT)
+	powershell -NoProfile -Command "New-Item -ItemType Directory -Path '$(BUILD_DIR)' -Force | Out-Null"
+else
+	mkdir -p $(BUILD_DIR)
+endif
 
 # 运行示例，可通过 ASM=path/to/program.asm 指定输入
 run: $(TARGET)
@@ -35,7 +44,7 @@ valgrind: $(TARGET)
 # 清理
 clean:
 ifeq ($(OS),Windows_NT)
-	powershell -NoProfile -Command "Remove-Item -LiteralPath 'main.o','decoder.o','cpu_core.o','compiler_core.o','storage.o','ui.o','$(TARGET)' -ErrorAction SilentlyContinue"
+	powershell -NoProfile -Command "Remove-Item -LiteralPath 'build/main.o','build/decoder.o','build/cpu_core.o','build/compiler_core.o','build/storage.o','build/ui.o','$(TARGET)' -ErrorAction SilentlyContinue"
 else
 	rm -f $(OBJS) $(TARGET)
 endif

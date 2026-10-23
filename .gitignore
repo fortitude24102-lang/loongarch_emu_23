@@ -1,4 +1,5 @@
 # Build outputs
+/build/
 *.o
 *.obj
 *.exe

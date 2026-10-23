@@ -37,13 +37,15 @@ make run
 也可以直接编译和运行：
 
 ```bash
-gcc -Wall -Wextra -std=c99 -g -O2 \
-    main.c decoder.c cpu_core.c compiler_core.c storage.c ui.c \
-    -o loongarch_emu
-./loongarch_emu examples/demo.asm
+mkdir -p build
+gcc -Iinclude -Wall -Wextra -std=c99 -g -O2 \
+    src/main.c src/decoder.c src/cpu_core.c \
+    src/compiler_core.c src/storage.c src/ui.c \
+    -o build/loongarch_emu
+./build/loongarch_emu examples/demo.asm
 ```
 
-Windows 用户可以在 WSL 终端中执行上述命令。使用原生 MinGW 时，需要完整的 GCC 工具链且支持 `<sys/time.h>` / `gettimeofday`；可将输出文件名改为 `loongarch_emu.exe`。
+Windows 用户可以在 WSL 终端中执行上述命令。使用原生 MinGW 时，需要完整的 GCC 工具链且支持 `<sys/time.h>` / `gettimeofday`；可将输出文件名改为 `build/loongarch_emu.exe`。
 
 ### 常用命令
 
@@ -52,7 +54,7 @@ Windows 用户可以在 WSL 终端中执行上述命令。使用原生 MinGW 时
 | `make` | 编译模拟器 |
 | `make run` | 运行 `examples/demo.asm` |
 | `make run ASM=path/to/program.asm` | 运行指定汇编文件 |
-| `./loongarch_emu path/to/program.asm` | 直接运行已有可执行文件 |
+| `./build/loongarch_emu path/to/program.asm` | 直接运行已有可执行文件 |
 | `make clean` | 删除编译产物 |
 | `make help` | 查看构建命令 |
 | `make valgrind` | 使用另行安装的 Valgrind 检查示例运行的内存使用 |
@@ -117,14 +119,24 @@ $r3  = 0x00000037  (55)
 
 ```text
 loongarch_emu_22/
-├── main.c               # 汇编、加载和仿真主流程
-├── global.h             # 硬件参数、操作码、全局数据结构
-├── compiler_core.c/.h   # 两遍扫描汇编器与符号表查找
-├── decoder.c/.h         # 指令格式、位域译码与反汇编文本
-├── cpu_core.c/.h        # CPU 状态与单周期执行
-├── storage.c/.h         # 指令链表、IRAM 加载与内存释放
-├── ui.c/.h              # 寄存器显示与运行统计
-├── examples/demo.asm    # 循环求和示例
+├── src/                 # C 源代码
+│   ├── main.c           # 汇编、加载和仿真主流程
+│   ├── compiler_core.c  # 两遍扫描汇编器与符号表查找
+│   ├── decoder.c        # 指令译码与反汇编文本
+│   ├── cpu_core.c       # CPU 状态与单周期执行
+│   ├── storage.c        # 指令链表、IRAM 加载与内存释放
+│   └── ui.c             # 寄存器显示与运行统计
+├── include/             # 头文件、硬件参数与数据结构
+│   ├── global.h
+│   ├── compiler_core.h
+│   ├── decoder.h
+│   ├── cpu_core.h
+│   ├── storage.h
+│   └── ui.h
+├── examples/            # 汇编示例
+│   └── demo.asm         # 循环求和示例
+├── build/               # 编译时生成，不提交到 Git
+├── README.md            # 项目说明与使用方法
 ├── Makefile             # 编译与运行入口
 ├── .gitattributes       # 文本换行规则
 └── .gitignore           # 编译产物和本地配置忽略规则
